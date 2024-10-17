@@ -78,22 +78,26 @@ class ForgotPasswordController extends Controller
 
     public function submitResetPasswordForm(Request $request)
     {
+        // dd($request->all());
          $request->validate([
-            'email' => 'required|email|exists:users',
+            'email' => 'required|email',
             'password' => 'required|string|min:6|confirmed',
             'password_confirmation' => 'required'
          ]);
-
-         $updatePassword = DB::table('password_resets')
+         $token = $request->token;
+        //  dd($token);
+         $updatePassword = DB::table('password_reset_tokens')
                             ->where([
                             'email' => $request->email, 
-                            'token' => $request->token
+                            'token' => $token
                             ])
                             ->first();
 
          if(!$updatePassword){
              return back()->withInput()->with('error', 'Invalid token!');
          }
+
+        //  dd('hello');
 
          $user = User::where('email', $request->email)
                      ->update(['password' => Hash::make($request->password)]);
